@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${template.id != null ? 'Edit Template' : 'Create Template'} + ' - Gemini Deep Research'">Edit Template - Gemini Deep Research</title>
+</head>
+<body>
+    <div th:replace="~{base :: body(content=~{::#main-content}, title=${template.id != null ? 'Edit Template' : 'Create Template'} + ' - Gemini Deep Research')}">
+        <div id="main-content">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 th:text="${template.id != null ? 'Edit Template' : 'Create Template'}">Edit Template</h2>
+                        <a href="/templates" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Templates
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 th:text="${template.id != null ? 'Edit Template: ' + template.name : 'Create New Template'}">Create New Template</h3>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/templates/save}" method="post" th:object="${template}">
+                        <input type="hidden" th:field="*{id}" />
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Template Name*</label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                                <div class="form-text">Give your template a descriptive name.</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Category</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="category" th:field="*{category}">
+                                        <option value="">-- Select Category --</option>
+                                        <option th:each="cat : ${categories}" 
+                                                th:value="${cat}" 
+                                                th:text="${cat}">Category</option>
+                                    </select>
+                                    <input type="text" class="form-control" id="newCategory" placeholder="Or create new category">
+                                    <button class="btn btn-outline-secondary" type="button" id="addCategoryBtn">Add</button>
+                                </div>
+                                <div class="form-text">Categorize your template for easier searching.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" th:field="*{description}" rows="2"></textarea>
+                                <div class="form-text">A brief description of what this template is used for.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="templateContent" class="form-label">Template Content*</label>
+                                <textarea class="form-control" id="templateContent" th:field="*{templateContent}" rows="10" required></textarea>
+                                <div class="form-text">
+                                    The template content with placeholders. Use the format specified below for placeholders.
+                                    Example: "Research the impact of {{technology}} on {{industry}} focusing on {{timeframe}}."
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="placeholderFormat" class="form-label">Placeholder Format</label>
+                                <input type="text" class="form-control" id="placeholderFormat" th:field="*{placeholderFormat}" placeholder="{{%s}}">
+                                <div class="form-text">
+                                    Format for placeholders. Use %s where the variable name should appear.
+                                    Default: {{%s}} (e.g., {{variable}})
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="createdBy" class="form-label">Created By</label>
+                                <input type="text" class="form-control" id="createdBy" th:field="*{createdBy}">
+                                <div class="form-text">Your name or identifier (optional).</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="isPublic" th:field="*{isPublic}">
+                                    <label class="form-check-label" for="isPublic">
+                                        Make this template public
+                                    </label>
+                                </div>
+                                <div class="form-text">Public templates are visible to all users.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="button" id="validateBtn" class="btn btn-outline-info me-2">
+                                <i class="bi bi-check-circle"></i> Validate Placeholders
+                            </button>
+                            <button type="button" id="previewBtn" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-eye"></i> Preview
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Template
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Placeholder Validation Modal -->
+            <div class="modal fade" id="placeholderModal" tabindex="-1" aria-labelledby="placeholderModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="placeholderModalLabel">Template Placeholders</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="placeholderList">
+                                <p>Validating placeholders...</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Template Preview Modal -->
+            <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="previewModalLabel">Template Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="variablesForm">
+                                <!-- Will be populated with form fields for each placeholder -->
+                            </div>
+                            <hr>
+                            <h6>Preview Result:</h6>
+                            <div id="previewResult" class="p-3 bg-light rounded">
+                                <p class="text-muted">Fill in the placeholders above to see a preview</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-primary" id="updatePreviewBtn">Update Preview</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add new category
+            document.getElementById('addCategoryBtn').addEventListener('click', function() {
+                const newCategoryInput = document.getElementById('newCategory');
+                const categorySelect = document.getElementById('category');
+                
+                if (newCategoryInput.value.trim() !== '') {
+                    // Create new option
+                    const newOption = document.createElement('option');
+                    newOption.value = newCategoryInput.value.trim();
+                    newOption.text = newCategoryInput.value.trim();
+                    
+                    // Add to select and select it
+                    categorySelect.add(newOption);
+                    categorySelect.value = newCategoryInput.value.trim();
+                    
+                    // Clear input
+                    newCategoryInput.value = '';
+                }
+            });
+            
+            // Validate placeholders
+            document.getElementById('validateBtn').addEventListener('click', function() {
+                const templateContent = document.getElementById('templateContent').value;
+                const placeholderFormat = document.getElementById('placeholderFormat').value;
+                
+                fetch('/api/templates/validate?templateContent=' + encodeURIComponent(templateContent) + 
+                      (placeholderFormat ? '&placeholderFormat=' + encodeURIComponent(placeholderFormat) : ''))
+                    .then(response => response.json())
+                    .then(placeholders => {
+                        const placeholderList = document.getElementById('placeholderList');
+                        placeholderList.innerHTML = '';
+                        
+                        if (placeholders && placeholders.length > 0) {
+                            const ul = document.createElement('ul');
+                            ul.className = 'list-group';
+                            
+                            placeholders.forEach(placeholder => {
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item';
+                                li.textContent = placeholder;
+                                ul.appendChild(li);
+                            });
+                            
+                            placeholderList.appendChild(ul);
+                        } else {
+                            placeholderList.innerHTML = '<div class="alert alert-warning">No placeholders found in the template.</div>';
+                        }
+                        
+                        // Show modal
+                        new bootstrap.Modal(document.getElementById('placeholderModal')).show();
+                    })
+                    .catch(error => {
+                        console.error('Error validating placeholders:', error);
+                        document.getElementById('placeholderList').innerHTML = 
+                            '<div class="alert alert-danger">Error validating placeholders: ' + error.message + '</div>';
+                        
+                        // Show modal even on error
+                        new bootstrap.Modal(document.getElementById('placeholderModal')).show();
+                    });
+            });
+            
+            // Preview button
+            document.getElementById('previewBtn').addEventListener('click', function() {
+                const templateContent = document.getElementById('templateContent').value;
+                const placeholderFormat = document.getElementById('placeholderFormat').value;
+                
+                fetch('/api/templates/validate?templateContent=' + encodeURIComponent(templateContent) + 
+                      (placeholderFormat ? '&placeholderFormat=' + encodeURIComponent(placeholderFormat) : ''))
+                    .then(response => response.json())
+                    .then(placeholders => {
+                        const variablesForm = document.getElementById('variablesForm');
+                        variablesForm.innerHTML = '';
+                        
+                        if (placeholders && placeholders.length > 0) {
+                            placeholders.forEach(placeholder => {
+                                const formGroup = document.createElement('div');
+                                formGroup.className = 'mb-3';
+                                
+                                const label = document.createElement('label');
+                                label.className = 'form-label';
+                                label.htmlFor = 'var_' + placeholder;
+                                label.textContent = placeholder;
+                                
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.className = 'form-control placeholder-input';
+                                input.id = 'var_' + placeholder;
+                                input.setAttribute('data-placeholder', placeholder);
+                                input.placeholder = 'Enter value for ' + placeholder;
+                                
+                                formGroup.appendChild(label);
+                                formGroup.appendChild(input);
+                                variablesForm.appendChild(formGroup);
+                            });
+                        } else {
+                            variablesForm.innerHTML = '<div class="alert alert-warning">No placeholders found in the template.</div>';
+                        }
+                        
+                        // Show modal
+                        new bootstrap.Modal(document.getElementById('previewModal')).show();
+                    })
+                    .catch(error => {
+                        console.error('Error getting placeholders for preview:', error);
+                        document.getElementById('variablesForm').innerHTML = 
+                            '<div class="alert alert-danger">Error getting placeholders: ' + error.message + '</div>';
+                        
+                        // Show modal even on error
+                        new bootstrap.Modal(document.getElementById('previewModal')).show();
+                    });
+            });
+            
+            // Update preview button
+            document.getElementById('updatePreviewBtn').addEventListener('click', function() {
+                const templateContent = document.getElementById('templateContent').value;
+                const placeholderFormat = document.getElementById('placeholderFormat').value;
+                const placeholderInputs = document.querySelectorAll('.placeholder-input');
+                
+                const variables = {};
+                placeholderInputs.forEach(input => {
+                    variables[input.getAttribute('data-placeholder')] = input.value;
+                });
+                
+                fetch('/api/templates/preview?templateContent=' + encodeURIComponent(templateContent) + 
+                      (placeholderFormat ? '&placeholderFormat=' + encodeURIComponent(placeholderFormat) : ''), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(variables)
+                })
+                    .then(response => response.text())
+                    .then(preview => {
+                        document.getElementById('previewResult').innerHTML = 
+                            '<pre class="mb-0">' + preview.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                    })
+                    .catch(error => {
+                        console.error('Error generating preview:', error);
+                        document.getElementById('previewResult').innerHTML = 
+                            '<div class="alert alert-danger">Error generating preview: ' + error.message + '</div>';
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

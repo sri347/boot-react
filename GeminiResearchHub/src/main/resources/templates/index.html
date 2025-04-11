@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Deep Research</title>
+</head>
+<body>
+    <div th:replace="~{base :: body(content=~{::#main-content}, title='Gemini Deep Research')}">
+        <div id="main-content">
+            <!-- Hero section with templates feature -->
+            <div class="card mb-4 bg-dark text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2><i class="bi bi-stars"></i> Deep Research Made Easier</h2>
+                            <p class="lead">Use our new template system to create, save, and reuse sophisticated research prompts.</p>
+                            <p>Create templates with variable placeholders that can be filled in with specific information when needed.</p>
+                            <a href="/templates" class="btn btn-primary me-2">
+                                <i class="bi bi-file-earmark-text"></i> Browse Templates
+                            </a>
+                            <a href="/templates/create" class="btn btn-outline-light">
+                                <i class="bi bi-plus-circle"></i> Create New Template
+                            </a>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-file-earmark-text display-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3><i class="bi bi-pencil-square"></i> Submit Research Prompt</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="promptForm" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="content" class="form-label">Research Prompt</label>
+                                    <textarea id="content" name="content" class="form-control" rows="4" required></textarea>
+                                    <div class="invalid-feedback">
+                                        Please enter a research prompt.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="createdBy" class="form-label">Your Name (Optional)</label>
+                                    <input type="text" id="createdBy" name="createdBy" class="form-control">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Notification Options</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="sendEmail">
+                                        <label class="form-check-label" for="sendEmail">
+                                            Email me when results are ready
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="sendSms">
+                                        <label class="form-check-label" for="sendSms">
+                                            Text me when results are ready
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="sendWhatsapp">
+                                        <label class="form-check-label" for="sendWhatsapp">
+                                            WhatsApp me when results are ready
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div id="emailSection" class="mb-3 d-none">
+                                    <label for="notificationEmail" class="form-label">Email Address</label>
+                                    <input type="email" id="notificationEmail" name="notificationEmail" class="form-control">
+                                    <div class="invalid-feedback">
+                                        Please enter a valid email address.
+                                    </div>
+                                </div>
+                                
+                                <div id="phoneSection" class="mb-3 d-none">
+                                    <label for="notificationPhone" class="form-label">Phone Number (with country code)</label>
+                                    <input type="tel" id="notificationPhone" name="notificationPhone" class="form-control" placeholder="+1234567890">
+                                    <div class="invalid-feedback">
+                                        Please enter a valid phone number with country code.
+                                    </div>
+                                </div>
+                                
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </form>
+                            
+                            <!-- Submission result alert -->
+                            <div id="submitResult" class="alert mt-3 d-none"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3><i class="bi bi-collection"></i> Batch Processing</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h4><i class="bi bi-file-text"></i> Upload Text File</h4>
+                                <p>Upload a text file with one research prompt per line.</p>
+                                <form id="fileUploadForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <input type="file" id="file" name="file" class="form-control" accept=".txt,.csv,.md">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fileEmail" class="form-label">Notification Email (Optional)</label>
+                                        <input type="email" id="fileEmail" name="notificationEmail" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="filePhone" class="form-label">Notification Phone (Optional)</label>
+                                        <input type="tel" id="filePhone" name="notificationPhone" class="form-control" placeholder="+1234567890">
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-secondary">Upload</button>
+                                    </div>
+                                </form>
+                                <div id="fileUploadResult" class="alert mt-3 d-none"></div>
+                            </div>
+                            
+                            <div>
+                                <h4><i class="bi bi-table"></i> Google Sheets Import</h4>
+                                <p>Import research prompts from a Google Sheet.</p>
+                                <form id="sheetsForm">
+                                    <div class="mb-3">
+                                        <label for="spreadsheetId" class="form-label">Spreadsheet ID</label>
+                                        <input type="text" id="spreadsheetId" name="spreadsheetId" class="form-control" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="range" class="form-label">Range</label>
+                                        <input type="text" id="range" name="range" class="form-control" placeholder="Sheet1!A2:A10">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="sheetsEmail" class="form-label">Notification Email (Optional)</label>
+                                        <input type="email" id="sheetsEmail" name="notificationEmail" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="sheetsPhone" class="form-label">Notification Phone (Optional)</label>
+                                        <input type="tel" id="sheetsPhone" name="notificationPhone" class="form-control" placeholder="+1234567890">
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-secondary">Import</button>
+                                    </div>
+                                </form>
+                                <div id="sheetsImportResult" class="alert mt-3 d-none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3><i class="bi bi-clock-history"></i> Recent Submissions</h3>
+                            <button id="refreshPrompts" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="promptsList" class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Prompt</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- This will be populated by JavaScript -->
+                                        <tr>
+                                            <td colspan="5" class="text-center">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

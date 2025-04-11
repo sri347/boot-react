@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Configuration - Gemini Deep Research</title>
+</head>
+<body>
+    <div th:replace="~{base :: body(content=~{::#main-content}, title='API Configuration - Gemini Deep Research')}">
+        <div id="main-content">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>API Configuration</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newConfigModal">
+                            <i class="bi bi-plus-circle"></i> Add New Configuration
+                        </button>
+                    </div>
+                    <p class="text-muted">Manage all external API credentials and settings here.</p>
+                </div>
+            </div>
+            
+            <!-- API Configuration Cards -->
+            <div class="row">
+                <!-- Gemini API Configuration Section -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h3>Gemini API</h3>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).GEMINI)}" class="mb-3">
+                                <div th:each="config : ${configs}" th:if="${config.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).GEMINI}" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5>Configuration #<span th:text="${config.id}">1</span>
+                                            <span th:if="${config.isActive}" class="badge bg-success ms-2">Active</span>
+                                        </h5>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary edit-config-btn" th:data-id="${config.id}">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger delete-config-btn" th:data-id="${config.id}">Delete</button>
+                                            <button class="btn btn-sm btn-outline-success test-config-btn" th:data-id="${config.id}">Test</button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>API Key:</strong> 
+                                        <span th:text="${#strings.abbreviate(config.apiKey, 10) + '********'}">abcd********</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Created:</strong> 
+                                        <span th:text="${#temporals.format(config.createdAt, 'yyyy-MM-dd HH:mm')}">2025-04-10 12:34</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:unless="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).GEMINI)}" class="text-center p-4">
+                                <div class="text-muted mb-3">No Gemini API configuration found</div>
+                                <button class="btn btn-primary add-config-btn" data-type="GEMINI">
+                                    Add Gemini API Configuration
+                                </button>
+                            </div>
+                            <hr>
+                            <div class="mt-3">
+                                <h5>How to get a Gemini API Key:</h5>
+                                <ol>
+                                    <li>Go to <a href="https://ai.google.dev/" target="_blank">Google AI Developer Portal</a></li>
+                                    <li>Sign in or create a Google account</li>
+                                    <li>Navigate to "API Keys" in the menu</li>
+                                    <li>Click "Create API Key" and follow the instructions</li>
+                                    <li>Copy the generated API key and paste it here</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SMS Configuration Section -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h3>SMS API (SignalWire)</h3>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).SMS)}" class="mb-3">
+                                <div th:each="config : ${configs}" th:if="${config.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).SMS}" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5>Configuration #<span th:text="${config.id}">1</span>
+                                            <span th:if="${config.isActive}" class="badge bg-success ms-2">Active</span>
+                                        </h5>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary edit-config-btn" th:data-id="${config.id}">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger delete-config-btn" th:data-id="${config.id}">Delete</button>
+                                            <button class="btn btn-sm btn-outline-success test-config-btn" th:data-id="${config.id}">Test</button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Project ID:</strong> 
+                                        <span th:text="${config.projectId}">project-id</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Space URL:</strong> 
+                                        <span th:text="${config.spaceUrl}">example.signalwire.com</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>From Number:</strong> 
+                                        <span th:text="${config.fromNumber}">+12345678900</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Created:</strong> 
+                                        <span th:text="${#temporals.format(config.createdAt, 'yyyy-MM-dd HH:mm')}">2025-04-10 12:34</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:unless="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).SMS)}" class="text-center p-4">
+                                <div class="text-muted mb-3">No SMS API configuration found</div>
+                                <button class="btn btn-primary add-config-btn" data-type="SMS">
+                                    Add SMS Configuration
+                                </button>
+                            </div>
+                            <hr>
+                            <div class="mt-3">
+                                <h5>How to set up SignalWire SMS:</h5>
+                                <ol>
+                                    <li>Go to <a href="https://signalwire.com/" target="_blank">SignalWire</a> and create an account</li>
+                                    <li>Create a new project and set up a phone number</li>
+                                    <li>Find your Project ID and API Token in the API section</li>
+                                    <li>Your Space URL is your SignalWire subdomain (e.g., example.signalwire.com)</li>
+                                    <li>Enter these details here to enable SMS notifications</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Email Configuration Section -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h3>Email Configuration</h3>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).EMAIL)}" class="mb-3">
+                                <div th:each="config : ${configs}" th:if="${config.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).EMAIL}" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5>Configuration #<span th:text="${config.id}">1</span>
+                                            <span th:if="${config.isActive}" class="badge bg-success ms-2">Active</span>
+                                        </h5>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary edit-config-btn" th:data-id="${config.id}">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger delete-config-btn" th:data-id="${config.id}">Delete</button>
+                                            <button class="btn btn-sm btn-outline-success test-config-btn" th:data-id="${config.id}">Test</button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Username:</strong> 
+                                        <span th:text="${config.username}">email@example.com</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Created:</strong> 
+                                        <span th:text="${#temporals.format(config.createdAt, 'yyyy-MM-dd HH:mm')}">2025-04-10 12:34</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:unless="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).EMAIL)}" class="text-center p-4">
+                                <div class="text-muted mb-3">No Email configuration found</div>
+                                <button class="btn btn-primary add-config-btn" data-type="EMAIL">
+                                    Add Email Configuration
+                                </button>
+                            </div>
+                            <hr>
+                            <div class="mt-3">
+                                <h5>How to set up Email Notifications:</h5>
+                                <ol>
+                                    <li>You'll need a Gmail account (or other compatible email)</li>
+                                    <li>For Gmail, you need to generate an "App Password"</li>
+                                    <li>Go to your Google Account > Security > App Passwords</li>
+                                    <li>Create a new App Password for "Mail" and select "Other"</li>
+                                    <li>Use your email as username and the generated 16-character password</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Google Sheets Configuration Section -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h3>Google Sheets API</h3>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).GOOGLE_SHEETS)}" class="mb-3">
+                                <div th:each="config : ${configs}" th:if="${config.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).GOOGLE_SHEETS}" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5>Configuration #<span th:text="${config.id}">1</span>
+                                            <span th:if="${config.isActive}" class="badge bg-success ms-2">Active</span>
+                                        </h5>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary edit-config-btn" th:data-id="${config.id}">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger delete-config-btn" th:data-id="${config.id}">Delete</button>
+                                            <button class="btn btn-sm btn-outline-success test-config-btn" th:data-id="${config.id}">Test</button>
+                                        </div>
+                                    </div>
+                                    <div th:if="${config.apiKey != null && !config.apiKey.empty}" class="mb-2">
+                                        <strong>API Key:</strong> 
+                                        <span th:text="${#strings.abbreviate(config.apiKey, 10) + '********'}">abcd********</span>
+                                    </div>
+                                    <div th:if="${config.clientId != null && !config.clientId.empty}" class="mb-2">
+                                        <strong>Client ID:</strong> 
+                                        <span th:text="${#strings.abbreviate(config.clientId, 10) + '********'}">abcd********</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Created:</strong> 
+                                        <span th:text="${#temporals.format(config.createdAt, 'yyyy-MM-dd HH:mm')}">2025-04-10 12:34</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:unless="${configs.stream().anyMatch(c -> c.configType == T(com.gemini.deepresearch.model.ApiConfig.ConfigType).GOOGLE_SHEETS)}" class="text-center p-4">
+                                <div class="text-muted mb-3">No Google Sheets API configuration found</div>
+                                <button class="btn btn-primary add-config-btn" data-type="GOOGLE_SHEETS">
+                                    Add Google Sheets Configuration
+                                </button>
+                            </div>
+                            <hr>
+                            <div class="mt-3">
+                                <h5>How to set up Google Sheets API:</h5>
+                                <ol>
+                                    <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+                                    <li>Create a new project</li>
+                                    <li>Enable the Google Sheets API</li>
+                                    <li>Create API credentials - either an API key or OAuth 2.0 Client ID</li>
+                                    <li>For API key: Enter the key in the "API Key" field</li>
+                                    <li>For OAuth: Enter Client ID, Client Secret and complete the OAuth flow</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- New Configuration Modal -->
+            <div class="modal fade" id="newConfigModal" tabindex="-1" aria-labelledby="newConfigModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="newConfigModalLabel">Add New API Configuration</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="configForm" th:action="@{/admin/api-config/save}" method="post" th:object="${newConfig}">
+                                <input type="hidden" id="configId" th:field="*{id}">
+                                
+                                <div class="mb-3">
+                                    <label for="configType" class="form-label">Configuration Type</label>
+                                    <select class="form-select" id="configType" th:field="*{configType}" required>
+                                        <option value="">Select Type</option>
+                                        <option th:each="type : ${configTypes}" th:value="${type}" th:text="${type}">CONFIG_TYPE</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="isActive" th:field="*{isActive}" checked>
+                                    <label class="form-check-label" for="isActive">Active Configuration</label>
+                                </div>
+                                
+                                <!-- Gemini API fields -->
+                                <div id="geminiFields" class="config-fields d-none">
+                                    <div class="mb-3">
+                                        <label for="apiKey" class="form-label">API Key</label>
+                                        <input type="text" class="form-control" id="apiKey" th:field="*{apiKey}" placeholder="Enter Gemini API Key">
+                                    </div>
+                                </div>
+                                
+                                <!-- SMS fields -->
+                                <div id="smsFields" class="config-fields d-none">
+                                    <div class="mb-3">
+                                        <label for="projectId" class="form-label">Project ID</label>
+                                        <input type="text" class="form-control" id="projectId" th:field="*{projectId}" placeholder="Enter SignalWire Project ID">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="spaceUrl" class="form-label">Space URL</label>
+                                        <input type="text" class="form-control" id="spaceUrl" th:field="*{spaceUrl}" placeholder="example.signalwire.com">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="apiToken" class="form-label">API Token</label>
+                                        <input type="password" class="form-control" id="apiToken" th:field="*{apiToken}" placeholder="Enter SignalWire API Token">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fromNumber" class="form-label">From Number</label>
+                                        <input type="text" class="form-control" id="fromNumber" th:field="*{fromNumber}" placeholder="+12345678900">
+                                    </div>
+                                </div>
+                                
+                                <!-- Email fields -->
+                                <div id="emailFields" class="config-fields d-none">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Email Username</label>
+                                        <input type="email" class="form-control" id="username" th:field="*{username}" placeholder="your.email@gmail.com">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Email Password / App Password</label>
+                                        <input type="password" class="form-control" id="password" th:field="*{password}" placeholder="Enter email password or app password">
+                                    </div>
+                                </div>
+                                
+                                <!-- Google Sheets fields -->
+                                <div id="googleSheetsFields" class="config-fields d-none">
+                                    <div class="alert alert-info">
+                                        <strong>Note:</strong> You can use either an API key or OAuth credentials.
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="gsApiKey" class="form-label">API Key (Simplest option)</label>
+                                        <input type="text" class="form-control" id="gsApiKey" th:field="*{apiKey}" placeholder="Enter Google Sheets API Key">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">OAuth2 Credentials (Advanced)</label>
+                                        <div class="card mb-2">
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="clientId" class="form-label">Client ID</label>
+                                                    <input type="text" class="form-control" id="clientId" th:field="*{clientId}" placeholder="Enter OAuth Client ID">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="clientSecret" class="form-label">Client Secret</label>
+                                                    <input type="password" class="form-control" id="clientSecret" th:field="*{clientSecret}" placeholder="Enter OAuth Client Secret">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="refreshToken" class="form-label">Refresh Token</label>
+                                                    <input type="password" class="form-control" id="refreshToken" th:field="*{refreshToken}" placeholder="Enter OAuth Refresh Token">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Configuration</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test Result Modal -->
+            <div class="modal fade" id="testResultModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Configuration Test Result</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="testResultContent"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const configType = document.getElementById('configType');
+            const configForm = document.getElementById('configForm');
+            const configFields = document.querySelectorAll('.config-fields');
+            const addConfigBtns = document.querySelectorAll('.add-config-btn');
+            const editConfigBtns = document.querySelectorAll('.edit-config-btn');
+            const deleteConfigBtns = document.querySelectorAll('.delete-config-btn');
+            const testConfigBtns = document.querySelectorAll('.test-config-btn');
+            const modal = new bootstrap.Modal(document.getElementById('newConfigModal'));
+            const testResultModal = new bootstrap.Modal(document.getElementById('testResultModal'));
+            
+            // Show/hide fields based on config type
+            configType.addEventListener('change', function() {
+                configFields.forEach(field => field.classList.add('d-none'));
+                
+                const selectedType = this.value;
+                if (selectedType === 'GEMINI') {
+                    document.getElementById('geminiFields').classList.remove('d-none');
+                } else if (selectedType === 'SMS') {
+                    document.getElementById('smsFields').classList.remove('d-none');
+                } else if (selectedType === 'EMAIL') {
+                    document.getElementById('emailFields').classList.remove('d-none');
+                } else if (selectedType === 'GOOGLE_SHEETS') {
+                    document.getElementById('googleSheetsFields').classList.remove('d-none');
+                }
+            });
+            
+            // Add configuration button
+            addConfigBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Reset form
+                    configForm.reset();
+                    document.getElementById('configId').value = '';
+                    
+                    // Set config type
+                    const type = this.getAttribute('data-type');
+                    configType.value = type;
+                    configType.dispatchEvent(new Event('change'));
+                    
+                    // Show modal
+                    modal.show();
+                });
+            });
+            
+            // Edit configuration button
+            editConfigBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    
+                    // Fetch config data
+                    fetch(`/admin/api-config/${id}`)
+                        .then(response => response.json())
+                        .then(config => {
+                            // Fill form
+                            document.getElementById('configId').value = config.id;
+                            document.getElementById('configType').value = config.configType;
+                            document.getElementById('isActive').checked = config.isActive;
+                            
+                            if (config.apiKey) document.getElementById('apiKey').value = '';
+                            if (config.projectId) document.getElementById('projectId').value = config.projectId;
+                            if (config.spaceUrl) document.getElementById('spaceUrl').value = config.spaceUrl;
+                            if (config.apiToken) document.getElementById('apiToken').value = '';
+                            if (config.fromNumber) document.getElementById('fromNumber').value = config.fromNumber;
+                            if (config.username) document.getElementById('username').value = config.username;
+                            if (config.password) document.getElementById('password').value = '';
+                            if (config.clientId) document.getElementById('clientId').value = config.clientId;
+                            if (config.clientSecret) document.getElementById('clientSecret').value = '';
+                            if (config.refreshToken) document.getElementById('refreshToken').value = '';
+                            
+                            // Show appropriate fields
+                            configType.dispatchEvent(new Event('change'));
+                            
+                            // Show modal
+                            modal.show();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching config:', error);
+                            alert('Error fetching configuration details');
+                        });
+                });
+            });
+            
+            // Delete configuration button
+            deleteConfigBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!confirm('Are you sure you want to delete this configuration?')) {
+                        return;
+                    }
+                    
+                    const id = this.getAttribute('data-id');
+                    
+                    fetch(`/admin/api-config/${id}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to delete configuration');
+                        }
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error deleting config:', error);
+                        alert('Error deleting configuration');
+                    });
+                });
+            });
+            
+            // Test configuration button
+            testConfigBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const testResultContent = document.getElementById('testResultContent');
+                    
+                    testResultContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Testing configuration...</p></div>';
+                    testResultModal.show();
+                    
+                    fetch(`/admin/api-config/${id}/test`, {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            testResultContent.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> ' + 
+                                                         result.message + '</div>';
+                        } else if (result.error) {
+                            testResultContent.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ' + 
+                                                         result.error + '</div>';
+                        } else {
+                            testResultContent.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-circle"></i> ' + 
+                                                         result.message + '</div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error testing config:', error);
+                        testResultContent.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ' + 
+                                                     'Error testing configuration: ' + error.message + '</div>';
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Templates - Gemini Deep Research</title>
+</head>
+<body>
+    <div th:replace="~{base :: body(content=~{::#main-content}, title='Prompt Templates - Gemini Deep Research')}">
+        <div id="main-content">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>Prompt Templates</h2>
+                        <a href="/templates/create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create New Template
+                        </a>
+                    </div>
+                    <p class="text-muted">Create and manage reusable research prompt templates with variable placeholders.</p>
+                </div>
+            </div>
+            
+            <!-- Search Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Search Templates</h3>
+                </div>
+                <div class="card-body">
+                    <form action="/templates" method="get" class="row">
+                        <div class="col-md-5 mb-3">
+                            <label for="name" class="form-label">Template Name</label>
+                            <input type="text" id="name" name="name" class="form-control" th:value="${searchName}">
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select id="category" name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                <option th:each="cat : ${categories}" 
+                                        th:value="${cat}" 
+                                        th:text="${cat}"
+                                        th:selected="${cat == searchCategory}">Category</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Templates List -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Available Templates</h3>
+                </div>
+                <div class="card-body">
+                    <div th:if="${templates.empty}" class="alert alert-info">
+                        No templates found. <a href="/templates/create">Create a new template</a> to get started.
+                    </div>
+                    
+                    <div class="row" th:if="${!templates.empty}">
+                        <div class="col-md-6 col-lg-4 mb-4" th:each="template : ${templates}">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0" th:text="${template.name}">Template Name</h5>
+                                    <span th:if="${template.isPublic}" class="badge bg-success">Public</span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text" th:text="${template.description}">Template description...</p>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Category:</strong> 
+                                        <span th:text="${template.category ?: 'Uncategorized'}">Category</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Placeholders:</strong>
+                                        <div class="mt-1">
+                                            <span th:each="placeholder : ${template.placeholders}" 
+                                                  class="badge bg-secondary me-1 mb-1" 
+                                                  th:text="${placeholder}">placeholder</span>
+                                            <span th:if="${template.placeholders.empty}" class="text-muted">No placeholders</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Usage Count:</strong> 
+                                        <span th:text="${template.usageCount ?: 0}">0</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Created By:</strong> 
+                                        <span th:text="${template.createdBy ?: 'Unknown'}">Creator</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <a th:href="@{'/templates/edit/' + ${template.id}}" class="btn btn-sm btn-outline-primary me-1">
+                                                Edit
+                                            </a>
+                                            <form th:action="@{'/templates/delete/' + ${template.id}}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Are you sure you want to delete this template?')">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <a th:href="@{'/templates/use/' + ${template.id}}" class="btn btn-sm btn-success">
+                                            Use Template
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

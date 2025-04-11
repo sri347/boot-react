@@ -1,0 +1,113 @@
+/* Custom Styles for Gemini Deep Research */
+
+/* BOOTSTRAP THEME ADJUSTMENTS */
+[data-bs-theme=dark] {
+    --bs-body-color: var(--bs-gray-300);
+    --bs-body-bg: var(--bs-gray-900);
+}
+
+/* General Layout */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* API Status Indicators */
+.api-status .badge {
+    margin-right: 0.25rem;
+}
+
+/* Card Customizations */
+.card {
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 500;
+}
+
+/* Form Elements */
+textarea.form-control {
+    min-height: 120px;
+}
+
+/* Tables */
+.table-responsive {
+    margin-bottom: 1rem;
+}
+
+.table th {
+    font-weight: 600;
+}
+
+/* Prompt Content Limits */
+.prompt-content {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.prompt-result {
+    max-height: 600px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+/* Animation for processing state */
+.processing-indicator {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 20px;
+}
+
+.processing-indicator div {
+    position: absolute;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.processing-indicator div:nth-child(1) {
+    left: 8px;
+    animation: processing1 0.6s infinite;
+}
+
+.processing-indicator div:nth-child(2) {
+    left: 8px;
+    animation: processing2 0.6s infinite;
+}
+
+.processing-indicator div:nth-child(3) {
+    left: 32px;
+    animation: processing2 0.6s infinite;
+}
+
+.processing-indicator div:nth-child(4) {
+    left: 56px;
+    animation: processing3 0.6s infinite;
+}
+
+@keyframes processing1 {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+
+@keyframes processing2 {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(24px, 0); }
+}
+
+@keyframes processing3 {
+    0% { transform: scale(1); }
+    100% { transform: scale(0); }
+}

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Use Template - Gemini Deep Research</title>
+</head>
+<body>
+    <div th:replace="~{base :: body(content=~{::#main-content}, title='Use Template - Gemini Deep Research')}">
+        <div id="main-content">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>Use Template</h2>
+                        <a href="/templates" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Templates
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h3 th:text="${template.name}">Template Name</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text" th:text="${template.description}">Template description...</p>
+                            
+                            <div class="mb-3">
+                                <strong>Category:</strong> 
+                                <span th:text="${template.category ?: 'Uncategorized'}">Category</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Created By:</strong> 
+                                <span th:text="${template.createdBy ?: 'Unknown'}">Creator</span>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <strong><i class="bi bi-info-circle"></i> Instructions:</strong>
+                                <p>Fill in the values for each placeholder to generate a research prompt.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Fill in Template Values</h3>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${template.placeholders.empty}" class="alert alert-warning">
+                                This template has no placeholders. You can submit it directly.
+                            </div>
+                            
+                            <form id="templateForm">
+                                <input type="hidden" id="templateId" th:value="${template.id}">
+                                
+                                <!-- Placeholder inputs -->
+                                <div id="placeholdersContainer">
+                                    <div class="mb-3" th:each="placeholder : ${template.placeholders}">
+                                        <label th:for="'placeholder_' + ${placeholder}" class="form-label" th:text="${placeholder}">Placeholder</label>
+                                        <input type="text" class="form-control placeholder-input" th:id="'placeholder_' + ${placeholder}" 
+                                               th:data-placeholder="${placeholder}">
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <!-- Notification options -->
+                                <h4>Notification Options</h4>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="notificationEmail" class="form-label">Email Notification</label>
+                                        <input type="email" class="form-control" id="notificationEmail" 
+                                               placeholder="Enter email to receive results">
+                                        <div class="form-text">We'll send the research results to this email.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="notificationPhone" class="form-label">Phone Notification</label>
+                                        <input type="tel" class="form-control" id="notificationPhone" 
+                                               placeholder="Enter phone number with country code">
+                                        <div class="form-text">Format: +1234567890 (include country code)</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="sendSms" value="true">
+                                        <label class="form-check-label" for="sendSms">Send SMS notification</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="sendWhatsapp" value="true">
+                                        <label class="form-check-label" for="sendWhatsapp">Send WhatsApp notification</label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Preview section -->
+                                <div class="mb-4">
+                                    <h4>Preview</h4>
+                                    <div id="previewContainer" class="p-3 bg-light rounded">
+                                        <p class="text-muted">Fill in the placeholders to see a preview of your prompt.</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Submit button -->
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" id="previewBtn" class="btn btn-outline-secondary">
+                                        <i class="bi bi-eye"></i> Update Preview
+                                    </button>
+                                    <button type="button" id="submitBtn" class="btn btn-primary">
+                                        <i class="bi bi-send"></i> Submit Prompt
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Result modal -->
+            <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="resultModalLabel">Prompt Submitted</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="resultModalBody">
+                            <div class="alert alert-success">
+                                <p>Your prompt has been submitted successfully!</p>
+                                <p>Prompt ID: <strong id="promptIdText"></strong></p>
+                            </div>
+                            <p>You will be notified when the research is complete.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="/templates" class="btn btn-outline-secondary">Back to Templates</a>
+                            <a href="#" id="viewPromptBtn" class="btn btn-primary">View Prompt</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error modal -->
+            <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="errorModalBody">
+                            <div class="alert alert-danger">
+                                <p>An error occurred while submitting your prompt.</p>
+                                <p id="errorText"></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const templateId = document.getElementById('templateId').value;
+            const templateContent = /*[[${template.templateContent}]]*/ '';
+            const placeholderFormat = /*[[${template.placeholderFormat}]]*/ '';
+            
+            // Preview button
+            document.getElementById('previewBtn').addEventListener('click', updatePreview);
+            
+            // Add event listeners to update preview on input
+            document.querySelectorAll('.placeholder-input').forEach(input => {
+                input.addEventListener('input', updatePreview);
+            });
+            
+            // Initial preview update
+            updatePreview();
+            
+            // Update preview function
+            function updatePreview() {
+                const variables = {};
+                document.querySelectorAll('.placeholder-input').forEach(input => {
+                    variables[input.getAttribute('data-placeholder')] = input.value || `[${input.getAttribute('data-placeholder')}]`;
+                });
+                
+                fetch('/api/templates/preview?templateContent=' + encodeURIComponent(templateContent) + 
+                      (placeholderFormat ? '&placeholderFormat=' + encodeURIComponent(placeholderFormat) : ''), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(variables)
+                })
+                    .then(response => response.text())
+                    .then(preview => {
+                        document.getElementById('previewContainer').innerHTML = 
+                            '<pre class="mb-0">' + preview.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                    })
+                    .catch(error => {
+                        console.error('Error generating preview:', error);
+                        document.getElementById('previewContainer').innerHTML = 
+                            '<div class="alert alert-danger">Error generating preview: ' + error.message + '</div>';
+                    });
+            }
+            
+            // Submit button
+            document.getElementById('submitBtn').addEventListener('click', function() {
+                // Collect variables
+                const variables = {};
+                document.querySelectorAll('.placeholder-input').forEach(input => {
+                    variables[input.getAttribute('data-placeholder')] = input.value;
+                });
+                
+                // Build request data
+                const requestData = {
+                    templateId: templateId,
+                    variables: variables,
+                    notificationEmail: document.getElementById('notificationEmail').value,
+                    notificationPhone: document.getElementById('notificationPhone').value,
+                    sendSms: document.getElementById('sendSms').checked,
+                    sendWhatsapp: document.getElementById('sendWhatsapp').checked
+                };
+                
+                // Send API request
+                fetch('/api/templates/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Show success modal
+                        document.getElementById('promptIdText').textContent = data.id;
+                        document.getElementById('viewPromptBtn').href = '/prompts/' + data.id;
+                        new bootstrap.Modal(document.getElementById('resultModal')).show();
+                    })
+                    .catch(error => {
+                        console.error('Error submitting prompt:', error);
+                        document.getElementById('errorText').textContent = error.message;
+                        new bootstrap.Modal(document.getElementById('errorModal')).show();
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
